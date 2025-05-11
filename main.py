@@ -26,6 +26,8 @@ model = joblib.load("model.pkl")
 
 # Input schema
 class InputData(BaseModel):
+    FirstName: str
+    LastName: str
     Age: int
     Gender: str
     Education: str
