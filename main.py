@@ -74,6 +74,10 @@ mappings = {
     "Labor": {"Both": 0, "Family": 1, "Hired": 2},
 }
 
+@app.get("/")
+def home():
+    return {"message": "API running. Go to /docs"}
+
 @app.post("/predict")
 def predict(data: InputData):
     input_dict = data.dict()
