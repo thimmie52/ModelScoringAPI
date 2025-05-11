@@ -1,0 +1,33 @@
+[
+  {
+    "username": "Thimmie",
+    "credit_score": 545.78,
+    "Repayment_status": 46.31370330601184,
+    "data": {
+      "Age": 30,
+      "Gender": 1,
+      "Education": 1,
+      "Marital_Status": 2,
+      "Region": 5,
+      "State": 24,
+      "Farm_Size": 5.0,
+      "Crop_Type": 0,
+      "Livestock_Type": 3,
+      "Livestock_Number": 8,
+      "Irrigation": 1,
+      "Crop_Cycles": 3,
+      "Technology_Use": 1,
+      "Previous_Loans": 1,
+      "Loan_Amount": 1000000.0,
+      "Repayment_Status": 0,
+      "Savings_Behavior": 1,
+      "Financial_Access": 1,
+      "Annual_Income": 1000000.0,
+      "Extension_Services": 1,
+      "Market_Distance": 10.0,
+      "Yield_Per_Season": 199990.0,
+      "Input_Usage": 1,
+      "Labor": 2
+    }
+  }
+]
