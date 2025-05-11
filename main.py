@@ -6,6 +6,10 @@ import os
 import json
 from fastapi.middleware.cors import CORSMiddleware
 
+# Define the User model to match the data structure you want to return
+
+
+
 app = FastAPI()
 
 # Add CORS middleware to your app
@@ -47,6 +51,7 @@ class InputData(BaseModel):
     Input_Usage: str
     Labor: str
     Username: str  # not used for prediction, only returned
+
 
 # Define mappings
 mappings = {
@@ -150,6 +155,31 @@ def predict(data: InputData):
         json.dump(existing, f, indent=2)
 
     return result
+
+def load_users():
+    results_path = "results.json"
+    if os.path.exists(results_path):
+        with open(results_path, "r") as f:
+            try:
+                return json.load(f)
+            except json.JSONDecodeError:
+                return []
+    else:
+        return []
+
+@app.get("/get-user/{username}")
+async def get_user(username: str):
+    # Load users data from results.json
+    users_data = load_users()
+
+    # Search for the user in the data
+    for user in users_data:
+        if user['username'] == username:
+            # Return the user data directly
+            return user
+
+    # If user is not found, raise a 404 error
+    raise HTTPException(status_code=404, detail="User not found")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
