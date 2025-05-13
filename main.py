@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import joblib
 import uvicorn
@@ -7,6 +7,14 @@ import json
 from fastapi.middleware.cors import CORSMiddleware
 
 # Define the User model to match the data structure you want to return
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+# Path to the downloaded service account key
+cred = credentials.Certificate("account_key.json")
+firebase_admin.initialize_app(cred)
+
+db = firestore.client()
 
 
 
@@ -141,33 +149,25 @@ def predict(data: InputData):
         "data": input_dict
     }
 
-    # Store in results.json
-    results_path = "results.json"
-    if os.path.exists(results_path):
-        with open(results_path, "r") as f:
-            try:
-                existing = json.load(f)
-            except json.JSONDecodeError:
-                existing = []
-    else:
-        existing = []
+    # Firebase: Store the result in Firestore
+    doc_ref = db.collection("user_profiles").document(username)
+    doc_ref.set(result)
 
-    existing.append(result)
-    with open(results_path, "w") as f:
-        json.dump(existing, f, indent=2)
 
     return result
 
 def load_users():
-    results_path = "results.json"
-    if os.path.exists(results_path):
-        with open(results_path, "r") as f:
-            try:
-                return json.load(f)
-            except json.JSONDecodeError:
-                return []
-    else:
-        return []
+    users = []
+    
+    # Query the "user_profiles" collection in Firestore
+    users_ref = db.collection("user_profiles")
+    docs = users_ref.stream()
+    
+    for doc in docs:
+        # Convert Firestore document to dictionary and add to users list
+        users.append(doc.to_dict())
+    
+    return users
 
 @app.get("/get-user/{username}")
 async def get_user(username: str):
