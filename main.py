@@ -3,15 +3,14 @@ from pydantic import BaseModel
 import joblib
 import uvicorn
 import os
-import json
 from fastapi.middleware.cors import CORSMiddleware
 
 # Define the User model to match the data structure you want to return
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-# Path to the downloaded service account key
-cred = credentials.Certificate("account_key.json")
+key_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+cred = credentials.Certificate(key_path)
 firebase_admin.initialize_app(cred)
 
 db = firestore.client()
