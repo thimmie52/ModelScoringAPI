@@ -4,13 +4,15 @@ import joblib
 import uvicorn
 import os
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Literal
+
 
 # Define the User model to match the data structure you want to return
 import firebase_admin
 from firebase_admin import credentials, firestore
 
 key_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-cred = credentials.Certificate(key_path)
+cred = credentials.Certificate("account_key.json")
 firebase_admin.initialize_app(cred)
 
 db = firestore.client()
@@ -181,6 +183,19 @@ async def get_user(username: str):
 
     # If user is not found, raise a 404 error
     raise HTTPException(status_code=404, detail="User not found")
+
+
+@app.get("/get-all-users")
+async def get_all_users(order: Literal["asc", "desc"] = "desc"):
+    users_data = load_users()
+
+    sorted_users = sorted(
+        users_data,
+        key=lambda x: x.get("Repayment_status", 0),
+        reverse=(order == "desc")
+    )
+
+    return sorted_users
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
