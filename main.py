@@ -62,6 +62,7 @@ class InputData(BaseModel):
     Input_Usage: str
     Labor: str
     Username: str  # not used for prediction, only returned
+    Password: str
 
 
 # Define mappings
@@ -108,6 +109,7 @@ def home():
 def predict(data: InputData):
     input_dict = data.dict()
     username = input_dict.pop("Username")
+    password = input_dict.pop("Password")
 
     # Apply mappings
     for key, map_dict in mappings.items():
@@ -147,7 +149,8 @@ def predict(data: InputData):
         "username": username,
         "credit_score": prediction[0],
         "Repayment_status": prediction[1],
-        "data": input_dict
+        "data": input_dict,
+        "password": password
     }
 
     # Firebase: Store the result in Firestore
@@ -196,6 +199,21 @@ async def get_all_users(order: Literal["asc", "desc"] = "desc"):
     )
 
     return sorted_users
+
+class LoginPayload(BaseModel):
+    username: str
+    password: str
+
+@app.post("/login")
+async def login(payload: LoginPayload):
+    users_data = load_users()
+
+    for user in users_data:
+        if user['username'] == payload.username:
+            if user['password'] == payload.password:
+                return user
+    return {"error": "Invalid credentials"}
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
