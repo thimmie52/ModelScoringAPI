@@ -12,6 +12,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 
 key_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
 cred = credentials.Certificate(key_path)
 firebase_admin.initialize_app(cred)
 
@@ -199,6 +200,61 @@ async def get_all_users(order: Literal["asc", "desc"] = "desc"):
     )
 
     return sorted_users
+
+
+
+@app.put("/update/{username}")
+def update_user(username: str, updated_data: dict):
+    doc_ref = db.collection("user_profiles").document(username)
+    doc = doc_ref.get()
+
+    if not doc.exists:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user_info = doc.to_dict()
+
+    current_data = user_info.get("data", {})
+    password = user_info.get("password", "")
+    firstname = current_data.get("FirstName", "")
+    lastname = current_data.get("LastName", "")
+
+    # Merge updates into current_data
+    merged_data = {**current_data, **updated_data}
+
+    # Apply mappings if required
+    for key, map_dict in mappings.items():
+        if key in merged_data:
+            merged_data[key] = map_dict.get(merged_data[key], 0)
+
+    # Prepare input features for model
+    feature_order = [
+        "Age", "Gender", "Education", "Marital_Status", "Region", "State",
+        "Farm_Size", "Crop_Type", "Livestock_Type", "Livestock_Number", "Irrigation",
+        "Crop_Cycles", "Technology_Use", "Previous_Loans", "Loan_Amount", "Repayment_Status",
+        "Savings_Behavior", "Financial_Access", "Annual_Income", "Extension_Services",
+        "Market_Distance", "Yield_Per_Season", "Input_Usage", "Labor"
+    ]
+
+    try:
+        model_input = [merged_data.get(feat, 0) for feat in feature_order]
+        prediction = model.predict([model_input])[0]  # e.g. [credit_score, repayment]
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Prediction failed: {str(e)}")
+
+    updated_record = {
+        "username": username,
+        "password": password,
+        "credit_score": prediction[0],
+        "Repayment_status": prediction[1],
+        "data": {
+            **merged_data,
+            "FirstName": firstname,
+            "LastName": lastname
+        }
+    }
+
+    doc_ref.set(updated_record)
+    return updated_record
 
 class LoginPayload(BaseModel):
     username: str
