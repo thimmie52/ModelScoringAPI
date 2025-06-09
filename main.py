@@ -5,6 +5,9 @@ import uvicorn
 import os
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Literal
+from email_validator import validate_email, EmailNotValidError
+from verification import send_email
+import random
 
 
 # Define the User model to match the data structure you want to return
@@ -269,6 +272,41 @@ async def login(payload: LoginPayload):
             if user['password'] == payload.password:
                 return user
     return {"error": "Invalid credentials"}
+
+verification_codes = {}
+
+class EmailInput(BaseModel):
+    email: str
+
+class CodeInput(BaseModel):
+    email: str
+    code: str
+
+def generate_code():
+    return str(random.randint(100000, 999999))
+
+async def send_email_code(email: str, code: str):
+    send_email(email=email, code=code)
+
+@app.post("/send-code")
+async def send_code(payload: EmailInput):
+    try:
+        validated = validate_email(payload.email).email
+    except EmailNotValidError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    code = generate_code()
+    verification_codes[validated] = code
+    await send_email_code(validated, code)
+    return {"message": f"Code sent to {validated}"}
+
+@app.post("/verify-code")
+def verify_code(payload: CodeInput):
+    stored = verification_codes.get(payload.email)
+    if stored and stored == payload.code:
+        verification_codes.pop(payload.email)  # clean up
+        return {"message": "Email verified successfully!"}
+    raise HTTPException(status_code=400, detail="Invalid code")
 
 
 if __name__ == "__main__":
