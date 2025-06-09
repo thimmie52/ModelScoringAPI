@@ -8,6 +8,7 @@ from typing import Literal
 from email_validator import validate_email, EmailNotValidError
 from verification import send_email
 import random
+from verification import send_email
 
 
 # Define the User model to match the data structure you want to return
