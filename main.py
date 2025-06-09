@@ -169,6 +169,47 @@ def predict(data: InputData):
 
     return result
 
+
+class AgentData(BaseModel):
+    username: str
+    password: str
+    firstName: str
+    lastName: str
+    email: str
+    phoneNumber: str
+    gender: str
+    dateOfBirth: Optional[str] = None
+    state: Optional[str] = None
+    lga: Optional[str] = None
+    assignedCommunities: Optional[str] = None
+    organization: Optional[str] = None
+    yearsOfExperience: Optional[int] = 0
+    areaOfExpertise: Optional[str] = None
+    languagesSpoken: Optional[List[str]] = []
+    isFullTime: Optional[int] = 0  # or bool if you prefer
+
+@app.post("/register_agent")
+def register_agent(agent: AgentData):
+    agent_dict = agent.dict()
+
+    username = agent_dict.pop("username")
+    password = agent_dict.pop("password")  # you might want to hash this in production
+
+    # Optionally do validation, transformation or checks here
+
+    # Prepare data to save
+    data_to_save = {
+        **agent_dict,
+        "password": password  # store with caution, ideally hash!
+    }
+
+    # Save to Firestore, under a new collection e.g. "agents"
+    doc_ref = db.collection("agents").document(username)
+    doc_ref.set(data_to_save)
+
+    return {"status": "success", "message": f"Agent {username} registered successfully."}
+
+
 def load_users():
     users = []
     
@@ -195,6 +236,19 @@ async def get_user(username: str):
 
     # If user is not found, raise a 404 error
     raise HTTPException(status_code=404, detail="User not found")
+
+@app.get("/get-agent/{username}")
+async def get_agent(username: str):
+    doc_ref = db.collection("agents").document(username)
+    doc = doc_ref.get()
+
+    if doc.exists:
+        agent_data = doc.to_dict()
+        # Optionally include username in the response if needed
+        agent_data["username"] = username
+        return agent_data
+
+    raise HTTPException(status_code=404, detail="Agent not found")
 
 
 @app.get("/get-all-users")
