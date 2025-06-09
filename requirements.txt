@@ -1,5 +1,6 @@
 annotated-types==0.7.0
 anyio==4.9.0
+brevo-python==1.1.2
 CacheControl==0.14.3
 cachetools==5.5.2
 certifi==2025.4.26
@@ -7,6 +8,9 @@ cffi==1.17.1
 charset-normalizer==3.4.2
 click==8.2.0
 cryptography==44.0.3
+dnspython==2.7.0
+dotenv==0.9.9
+email_validator==2.2.0
 fastapi==0.115.12
 firebase-admin==6.8.0
 google-api-core==2.24.2
@@ -38,6 +42,7 @@ pydantic_core==2.33.2
 PyJWT==2.10.1
 pyparsing==3.2.3
 python-dateutil==2.9.0.post0
+python-dotenv==1.1.0
 pytz==2025.2
 requests==2.32.3
 rsa==4.9.1
