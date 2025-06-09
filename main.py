@@ -10,6 +10,10 @@ from verification import send_email
 import random
 from verification import send_email
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 # Define the User model to match the data structure you want to return
 import firebase_admin

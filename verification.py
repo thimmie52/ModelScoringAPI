@@ -1,9 +1,11 @@
-import os
 from __future__ import print_function
-import time
+import time, os
 import brevo_python
 from brevo_python.rest import ApiException
 from pprint import pprint
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Configure API key authorization: api-key
 configuration = brevo_python.Configuration()
