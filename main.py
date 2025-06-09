@@ -4,7 +4,7 @@ import joblib
 import uvicorn
 import os
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Literal
+from typing import Literal, Optional, List
 from email_validator import validate_email, EmailNotValidError
 from verification import send_email
 import random
