@@ -185,7 +185,7 @@ class AgentData(BaseModel):
     organization: Optional[str] = None
     yearsOfExperience: Optional[int] = 0
     areaOfExpertise: Optional[str] = None
-    languagesSpoken: Optional[List[str]] = []
+    languagesSpoken: Optional[str] =None
     isFullTime: Optional[int] = 0  # or bool if you prefer
 
 @app.post("/register_agent")
