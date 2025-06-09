@@ -200,6 +200,7 @@ def register_agent(agent: AgentData):
     # Prepare data to save
     data_to_save = {
         **agent_dict,
+        "username": username,
         "password": password  # store with caution, ideally hash!
     }
 
@@ -222,6 +223,19 @@ def load_users():
         users.append(doc.to_dict())
     
     return users
+
+def load_agents():
+    agents = []
+    
+    # Query the "user_profiles" collection in Firestore
+    users_ref = db.collection("agents")
+    docs = users_ref.stream()
+    
+    for doc in docs:
+        # Convert Firestore document to dictionary and add to users list
+        agents.append(doc.to_dict())
+    
+    return agents
 
 @app.get("/get-user/{username}")
 async def get_user(username: str):
@@ -330,6 +344,18 @@ async def login(payload: LoginPayload):
         if user['username'] == payload.username:
             if user['password'] == payload.password:
                 return user
+    return {"error": "Invalid credentials"}
+
+
+
+@app.post("/agent-login")
+async def login(payload: LoginPayload):
+    agents_data = load_agents()
+
+    for agent in agents_data:
+        if agent['username'] == payload.username:
+            if agent['password'] == payload.password:
+                return agent
     return {"error": "Invalid credentials"}
 
 verification_codes = {}
